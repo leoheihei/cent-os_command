@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CentOS 命令速查手册 · 在线版</title>
+<meta name="description" content="CentOS 7/8/Stream 常用命令速查手册：系统信息、文件操作、包管理、服务控制、网络、磁盘、日志、SELinux 等 19 个分类，支持搜索与深色模式。">
+<style>
+  :root{
+    --bg:#f5f6f8; --panel:#ffffff; --text:#1f2430; --muted:#5b6472;
+    --border:#e3e6ec; --accent:#8a2fa8; --accent-2:#c04fd8;
+    --accent-soft:#f5ecf8; --code-bg:#eef1f5; --code-text:#7a2a92;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.04);
+    --shadow-lg:0 8px 30px rgba(16,24,40,.10);
+  }
+  html.dark{
+    --bg:#12141a; --panel:#1a1d26; --text:#e6e8ee; --muted:#9aa3b2;
+    --border:#2a2f3b; --accent:#d07ce8; --accent-2:#e8a6f7;
+    --accent-soft:#2a1f33; --code-bg:#242936; --code-text:#e3a9f5;
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+    --shadow-lg:0 8px 30px rgba(0,0,0,.5);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:15px; line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  code,pre,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+  a{color:var(--accent); text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ---------- 顶部栏 ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:color-mix(in srgb, var(--panel) 88%, transparent);
+    backdrop-filter:saturate(180%) blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .topbar-inner{
+    max-width:1100px; margin:0 auto; padding:10px 18px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .brand{display:flex; align-items:center; gap:9px; font-weight:700; font-size:15.5px}
+  .brand .logo{
+    width:26px;height:26px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800;
+  }
+  .brand small{font-weight:500;color:var(--muted);font-size:12px}
+  .spacer{flex:1}
+  .btn{
+    border:1px solid var(--border); background:var(--panel); color:var(--text);
+    padding:7px 12px; border-radius:9px; cursor:pointer;
+    font-size:13px; transition:.15s; white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--accent); color:var(--accent)}
+  .btn-primary{
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#fff; border:none; font-weight:600;
+  }
+  .btn-primary:hover{color:#fff; filter:brightness(1.08)}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    max-width:1100px; margin:0 auto; padding:56px 18px 34px; text-align:center;
+  }
+  .hero-badge{
+    display:inline-flex; align-items:center; gap:7px;
+    background:var(--accent-soft); color:var(--accent);
+    border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);
+    padding:5px 13px; border-radius:999px; font-size:12.5px; font-weight:600;
+    margin-bottom:20px;
+  }
+  .hero h1{
+    margin:0 0 14px; font-size:clamp(28px,5vw,42px);
+    letter-spacing:-.8px; line-height:1.2; font-weight:800;
+  }
+  .hero h1 .grad{
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p{
+    margin:0 auto 26px; max-width:620px;
+    color:var(--muted); font-size:15.5px; line-height:1.7;
+  }
+  .hero-actions{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+  .hero-actions .btn{padding:11px 22px; font-size:14.5px; border-radius:11px}
+
+  .stats{
+    display:flex; justify-content:center; gap:36px; flex-wrap:wrap;
+    margin:40px 0 8px;
+  }
+  .stat{text-align:center}
+  .stat b{
+    display:block; font-size:26px; font-weight:800; letter-spacing:-.5px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .stat span{color:var(--muted); font-size:12.5px}
+
+  /* ---------- 内容区 ---------- */
+  main{max-width:1100px; margin:0 auto; padding:20px 18px 70px}
+  .section-title{
+    display:flex; align-items:center; gap:10px;
+    margin:38px 0 16px; font-size:18px; font-weight:700; letter-spacing:-.2px;
+  }
+  .section-title::before{
+    content:""; width:4px; height:19px; border-radius:2px;
+    background:linear-gradient(180deg,var(--accent),var(--accent-2));
+  }
+
+  /* ---------- 卡片网格 ---------- */
+  .grid{
+    display:grid; gap:14px;
+    grid-template-columns:repeat(auto-fill,minmax(235px,1fr));
+  }
+  .card{
+    display:block; background:var(--panel); border:1px solid var(--border);
+    border-radius:14px; padding:17px 18px; color:var(--text);
+    box-shadow:var(--shadow); transition:.18s; position:relative; overflow:hidden;
+  }
+  .card:hover{
+    transform:translateY(-3px); box-shadow:var(--shadow-lg);
+    border-color:color-mix(in srgb,var(--accent) 40%,transparent);
+    text-decoration:none;
+  }
+  .card:hover .card-arrow{transform:translateX(4px); color:var(--accent)}
+  .card-icon{
+    width:34px; height:34px; border-radius:9px;
+    background:var(--accent-soft); color:var(--accent);
+    display:grid; place-items:center; font-size:17px; margin-bottom:11px;
+  }
+  .card h3{margin:0 0 5px; font-size:15px; font-weight:700}
+  .card p{margin:0; color:var(--muted); font-size:12.5px; line-height:1.55}
+  .card-arrow{
+    position:absolute; right:15px; top:15px; color:var(--muted);
+    font-size:15px; transition:.18s;
+  }
+
+  /* ---------- 特性 ---------- */
+  .features{
+    display:grid; gap:14px;
+    grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  }
+  .feature{
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:14px; padding:18px; box-shadow:var(--shadow);
+  }
+  .feature h3{margin:0 0 7px; font-size:14.5px}
+  .feature p{margin:0; color:var(--muted); font-size:13px; line-height:1.6}
+  .feature code{
+    background:var(--code-bg); color:var(--code-text);
+    padding:1.5px 6px; border-radius:5px; font-size:12.5px;
+    border:1px solid color-mix(in srgb,var(--accent) 12%,transparent);
+  }
+
+  /* ---------- 提示块 ---------- */
+  .callout{
+    background:var(--panel); border:1px solid var(--border);
+    border-left:4px solid var(--accent);
+    border-radius:10px; padding:15px 18px; margin-top:16px;
+    font-size:13.5px; color:var(--muted); line-height:1.7;
+  }
+  .callout b{color:var(--text)}
+
+  /* ---------- 页脚 ---------- */
+  footer{
+    border-top:1px solid var(--border); background:var(--panel);
+    padding:26px 18px; text-align:center;
+    color:var(--muted); font-size:12.5px;
+  }
+  footer a{color:var(--muted)}
+  footer a:hover{color:var(--accent)}
+
+  @media (max-width:640px){
+    .hero{padding:40px 16px 24px}
+    .stats{gap:24px}
+    .brand small{display:none}
+    main{padding:12px 14px 50px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部栏 ================= -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="logo">C</span>
+      <span>CentOS 命令速查 <small>Cheat Sheet</small></span>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn" id="themeBtn" title="切换深色 / 浅色">🌓 主题</button>
+    <a class="btn btn-primary" href="centos-cheatsheet.html">打开手册 →</a>
+  </div>
+</div>
+
+<!-- ================= Hero ================= -->
+<header class="hero">
+  <span class="hero-badge">● 单文件 · 离线可用 · 持续更新</span>
+  <h1>CentOS 常用命令<br><span class="grad">速查手册</span></h1>
+  <p>
+    面向 CentOS 7 / 8 / Stream 的命令速查表，覆盖系统信息、文件操作、包管理、
+    服务控制、网络、磁盘、日志、SELinux 等场景，支持即时搜索与深色模式。
+  </p>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="centos-cheatsheet.html">📖 打开完整手册</a>
+    <a class="btn" href="#categories">🗂 浏览分类</a>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>19</b><span>命令分类</span></div>
+    <div class="stat"><b>150+</b><span>速查命令</span></div>
+    <div class="stat"><b>3</b><span>支持版本</span></div>
+    <div class="stat"><b>0</b><span>依赖</span></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= 分类导航 ================= -->
+  <h2 class="section-title" id="categories">按分类浏览</h2>
+  <div class="grid">
+
+    <a class="card" href="centos-cheatsheet.html#sysinfo">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">🖥</div>
+      <h3>系统信息</h3>
+      <p>uname、hostnamectl、free、lscpu、uptime</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#osver">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">🏷</div>
+      <h3>操作系统版本</h3>
+      <p>os-release、centos-release、lsb_release</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#cd">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">📂</div>
+      <h3>目录操作 cd</h3>
+      <p>相对/绝对路径、CDPATH、pushd/popd</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#ls">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">📋</div>
+      <h3>ls 速查表</h3>
+      <p>长格式、排序、隐藏文件、颜色、inode</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#pkg">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">📦</div>
+      <h3>包管理</h3>
+      <p>yum / dnf / rpm 安装、查询、卸载</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#service">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">⚙️</div>
+      <h3>服务控制</h3>
+      <p>systemctl 启停、自启、状态、重载</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#user">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">👤</div>
+      <h3>用户与组</h3>
+      <p>useradd、passwd、usermod、sudo</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#perm">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">🔐</div>
+      <h3>权限与所有权</h3>
+      <p>chmod、chown、umask、ACL</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#text">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">🔍</div>
+      <h3>查找与文本</h3>
+      <p>find、grep、sed、awk、sort、diff</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#archive">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">🗜</div>
+      <h3>压缩与归档</h3>
+      <p>tar、gzip、zip 打包与解压</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#proc">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">📊</div>
+      <h3>进程管理</h3>
+      <p>ps、top、kill、nohup、tmux</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#net">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">🌐</div>
+      <h3>网络与防火墙</h3>
+      <p>ip、ss、curl、firewall-cmd、dig</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#disk">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">💾</div>
+      <h3>磁盘与文件系统</h3>
+      <p>df、du、lsblk、mount、mkfs</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#log">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">📜</div>
+      <h3>日志与排错</h3>
+      <p>journalctl、dmesg、last、history</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#selinux">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">🛡</div>
+      <h3>SELinux</h3>
+      <p>getenforce、setenforce、restorecon</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#cron">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">⏰</div>
+      <h3>计划任务</h3>
+      <p>crontab、at、timedatectl、chronyc</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#power">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">🔌</div>
+      <h3>关机与重启</h3>
+      <p>shutdown、reboot、poweroff、halt</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#key">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">⌨️</div>
+      <h3>常用快捷键</h3>
+      <p>Ctrl+C、Ctrl+R、!!、!$、Tab 补全</p>
+    </a>
+
+    <a class="card" href="centos-cheatsheet.html#script">
+      <span class="card-arrow">→</span>
+      <div class="card-icon">📝</div>
+      <h3>脚本实践</h3>
+      <p>set -e、安全 cd、子 Shell、pipefail</p>
+    </a>
+
+  </div>
+
+  <!-- ================= 特性 ================= -->
+  <h2 class="section-title">为什么用它</h2>
+  <div class="features">
+
+    <div class="feature">
+      <h3>🔎 即时搜索</h3>
+      <p>手册页顶部搜索框可实时过滤命令，输入 <code>tar</code> 或 <code>firewall</code> 即可定位，按 <code>Esc</code> 清空。</p>
+    </div>
+
+    <div class="feature">
+      <h3>🌓 深色模式</h3>
+      <p>右上角一键切换，自动跟随系统偏好，设置保存在浏览器 <code>localStorage</code> 中。</p>
+    </div>
+
+    <div class="feature">
+      <h3>📴 完全离线</h3>
+      <p>单个 HTML 文件，无外部依赖、无追踪脚本，下载后双击即可离线查阅。</p>
+    </div>
+
+    <div class="feature">
+      <h3>🧭 分类清晰</h3>
+      <p>19 个场景分类，顶部导航可直接跳转，每张表按“命令 / 作用”两列组织，扫读效率高。</p>
+    </div>
+
+    <div class="feature">
+      <h3>🖨 便于打印</h3>
+      <p>使用浏览器打印功能即可生成 PDF，适合作为运维桌面参考卡片。</p>
+    </div>
+
+    <div class="feature">
+      <h3>🚀 轻量无构建</h3>
+      <p>纯静态 HTML + CSS + 少量原生 JS，可直接托管在 GitHub Pages、对象存储或任意 Web 服务器。</p>
+    </div>
+
+  </div>
+
+  <!-- ================= 使用说明 ================= -->
+  <h2 class="section-title">使用方式</h2>
+  <div class="callout">
+    <b>在线访问：</b>点击任意分类卡片或顶部“打开手册”按钮，进入完整速查表。<br>
+    <b>离线保存：</b>在手册页按 <code>Ctrl + S</code>（macOS 为 <code>⌘ + S</code>）保存为 HTML 文件，即可离线使用。<br>
+    <b>本页作用：</b>作为项目入口页，集中展示分类导航与使用说明，完整命令表位于 <code>centos-cheatsheet.html</code>。
+  </div>
+
+</main>
+
+<footer>
+  CentOS 常用命令速查手册 · 托管于 GitHub Pages ·
+  <a href="centos-cheatsheet.html">进入手册</a>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var themeBtn = document.getElementById('themeBtn');
+  var saved = null;
+  try { saved = localStorage.getItem('centos-cheat-theme'); } catch (e) {}
+  if (saved === 'dark' || (!saved && window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    root.classList.add('dark');
+  }
+  themeBtn.addEventListener('click', function () {
+    root.classList.toggle('dark');
+    try {
+      localStorage.setItem('centos-cheat-theme',
+        root.classList.contains('dark') ? 'dark' : 'light');
+    } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CentOS 常用命令速查手册</title>
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --panel:#ffffff;
+    --text:#1f2430;
+    --muted:#5b6472;
+    --border:#e3e6ec;
+    --accent:#8a2fa8;
+    --accent-2:#c04fd8;
+    --accent-soft:#f5ecf8;
+    --code-bg:#eef1f5;
+    --code-text:#7a2a92;
+    --pre-bg:#1e2230;
+    --pre-text:#e6e8ee;
+    --warn-bg:#fff8e6;
+    --warn-border:#f0c36d;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.04);
+  }
+  html.dark{
+    --bg:#12141a;
+    --panel:#1a1d26;
+    --text:#e6e8ee;
+    --muted:#9aa3b2;
+    --border:#2a2f3b;
+    --accent:#d07ce8;
+    --accent-2:#e8a6f7;
+    --accent-soft:#2a1f33;
+    --code-bg:#242936;
+    --code-text:#e3a9f5;
+    --pre-bg:#0f1117;
+    --pre-text:#d7dbe4;
+    --warn-bg:#332a17;
+    --warn-border:#7a6128;
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:15px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  code,pre,kbd{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+
+  /* ---------- 顶部栏 ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:color-mix(in srgb, var(--panel) 88%, transparent);
+    backdrop-filter:saturate(180%) blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .topbar-inner{
+    max-width:1180px; margin:0 auto;
+    padding:10px 18px;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  }
+  .brand{
+    display:flex; align-items:center; gap:9px;
+    font-weight:700; font-size:16px; white-space:nowrap;
+  }
+  .brand .logo{
+    width:26px;height:26px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:grid;place-items:center;color:#fff;font-size:13px;font-weight:800;
+  }
+  .brand small{font-weight:500;color:var(--muted);font-size:12px}
+  .search{
+    flex:1 1 220px; min-width:180px; position:relative;
+  }
+  .search input{
+    width:100%; padding:8px 12px 8px 32px;
+    border:1px solid var(--border); border-radius:9px;
+    background:var(--bg); color:var(--text);
+    font-size:14px; outline:none; transition:.15s;
+  }
+  .search input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent);
+    background:var(--panel);
+  }
+  .search::before{
+    content:"⌕"; position:absolute; left:11px; top:50%;
+    transform:translateY(-50%); color:var(--muted); font-size:17px; pointer-events:none;
+  }
+  .btn{
+    border:1px solid var(--border); background:var(--panel); color:var(--text);
+    padding:7px 11px; border-radius:9px; cursor:pointer;
+    font-size:13px; transition:.15s; white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--accent); color:var(--accent)}
+
+  /* ---------- 导航 ---------- */
+  .nav{
+    border-bottom:1px solid var(--border);
+    background:var(--panel);
+    overflow-x:auto; scrollbar-width:thin;
+  }
+  .nav-inner{
+    max-width:1180px; margin:0 auto; padding:8px 18px;
+    display:flex; gap:7px; white-space:nowrap;
+  }
+  .nav a{
+    font-size:12.5px; padding:5px 11px; border-radius:999px;
+    color:var(--muted); text-decoration:none;
+    border:1px solid transparent; transition:.15s;
+  }
+  .nav a:hover{background:var(--accent-soft); color:var(--accent); border-color:color-mix(in srgb,var(--accent) 25%,transparent)}
+
+  /* ---------- 主体 ---------- */
+  main{max-width:1180px; margin:0 auto; padding:22px 18px 80px}
+
+  .intro{
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:14px; padding:18px 20px; margin-bottom:22px;
+    box-shadow:var(--shadow);
+  }
+  .intro h1{margin:0 0 8px; font-size:22px; letter-spacing:-.2px}
+  .intro p{margin:6px 0; color:var(--muted); font-size:14px}
+  .intro kbd{
+    background:var(--code-bg); border:1px solid var(--border);
+    border-radius:5px; padding:1px 6px; font-size:12.5px; color:var(--code-text);
+  }
+
+  section.card{
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:14px; margin-bottom:18px; overflow:hidden;
+    box-shadow:var(--shadow);
+    scroll-margin-top:110px;
+  }
+  .card-head{
+    padding:13px 18px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:10px;
+    background:linear-gradient(180deg,var(--accent-soft),transparent);
+  }
+  .card-head h2{
+    margin:0; font-size:16.5px; letter-spacing:-.1px;
+    display:flex; align-items:center; gap:9px;
+  }
+  .num{
+    display:inline-grid; place-items:center;
+    min-width:24px; height:24px; padding:0 6px;
+    border-radius:7px; font-size:12px; font-weight:700;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#fff; flex:none;
+  }
+  .card-body{padding:6px 18px 16px}
+
+  h3.sub{
+    font-size:14px; margin:18px 0 8px; color:var(--accent);
+    font-weight:700; letter-spacing:.2px;
+  }
+  h3.sub:first-child{margin-top:10px}
+
+  /* ---------- 表格 ---------- */
+  .table-wrap{overflow-x:auto; margin:8px 0}
+  table{width:100%; border-collapse:collapse; font-size:14px}
+  th,td{
+    text-align:left; padding:8px 12px;
+    border-bottom:1px solid var(--border); vertical-align:top;
+  }
+  th{
+    font-size:12.5px; text-transform:uppercase; letter-spacing:.4px;
+    color:var(--muted); font-weight:600;
+    background:color-mix(in srgb,var(--accent-soft) 55%,transparent);
+    position:sticky; top:0;
+  }
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
+  td:first-child{white-space:nowrap}
+  td code, td kbd{
+    background:var(--code-bg); color:var(--code-text);
+    padding:1.5px 6px; border-radius:5px; font-size:12.8px;
+    border:1px solid color-mix(in srgb,var(--accent) 12%,transparent);
+  }
+  tr[hidden]{display:none !important}
+  section[hidden]{display:none !important}
+
+  /* ---------- 代码块 ---------- */
+  pre{
+    background:var(--pre-bg); color:var(--pre-text);
+    padding:13px 15px; border-radius:10px;
+    overflow-x:auto; font-size:13px; line-height:1.6;
+    margin:10px 0; border:1px solid rgba(255,255,255,.06);
+  }
+  pre code{background:none; border:none; padding:0; color:inherit; font-size:inherit}
+
+  /* ---------- 提示 ---------- */
+  .tip{
+    background:var(--warn-bg); border:1px solid var(--warn-border);
+    border-left-width:4px; border-radius:8px;
+    padding:10px 14px; margin:12px 0; font-size:13.5px;
+  }
+  .tip b{color:var(--accent)}
+
+  .meta{
+    color:var(--muted); font-size:12.5px; margin:6px 0 0;
+  }
+
+  /* ---------- 回到顶部 ---------- */
+  #toTop{
+    position:fixed; right:22px; bottom:22px; z-index:60;
+    width:42px; height:42px; border-radius:50%;
+    border:1px solid var(--border); background:var(--panel); color:var(--accent);
+    font-size:18px; cursor:pointer; display:none; place-items:center;
+    box-shadow:0 4px 14px rgba(0,0,0,.14); transition:.18s;
+  }
+  #toTop:hover{transform:translateY(-2px)}
+  #toTop.show{display:grid}
+
+  footer{
+    max-width:1180px; margin:0 auto; padding:0 18px 40px;
+    color:var(--muted); font-size:12.5px; text-align:center;
+  }
+
+  @media (max-width:640px){
+    body{font-size:14.5px}
+    .brand small{display:none}
+    .card-body{padding:4px 13px 14px}
+    .card-head{padding:11px 13px}
+    th,td{padding:7px 9px}
+    td:first-child{white-space:normal}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= 顶部栏 ================= -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="logo">C</span>
+      <span>CentOS 命令速查 <small>Cheat Sheet</small></span>
+    </div>
+    <div class="search">
+      <input id="q" type="search" placeholder="搜索命令，如 tar、systemctl、权限…" autocomplete="off">
+    </div>
+    <button class="btn" id="themeBtn" title="切换深色 / 浅色">🌓 主题</button>
+  </div>
+</div>
+
+<!-- ================= 导航 ================= -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#sysinfo">系统信息</a>
+    <a href="#osver">OS 版本</a>
+    <a href="#cd">目录操作 cd</a>
+    <a href="#ls">ls 速查</a>
+    <a href="#pkg">包管理</a>
+    <a href="#service">服务控制</a>
+    <a href="#user">用户与组</a>
+    <a href="#perm">权限</a>
+    <a href="#text">查找与文本</a>
+    <a href="#archive">压缩归档</a>
+    <a href="#proc">进程管理</a>
+    <a href="#net">网络与防火墙</a>
+    <a href="#disk">磁盘与文件系统</a>
+    <a href="#log">日志排错</a>
+    <a href="#selinux">SELinux</a>
+    <a href="#cron">计划任务</a>
+    <a href="#power">关机重启</a>
+    <a href="#key">快捷键</a>
+    <a href="#script">脚本实践</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- 简介 -->
+  <div class="intro">
+    <h1>CentOS 常用命令速查手册</h1>
+    <p>适用系统：<b>CentOS 7 / 8 / CentOS Stream 8・9</b>。CentOS 8 及以上默认使用 <kbd>dnf</kbd>，<kbd>yum</kbd> 通常是其兼容别名。</p>
+    <p>查看帮助：<kbd>man 命令</kbd> 或 <kbd>命令 --help</kbd>；判断命令类型：<kbd>type 命令</kbd>。</p>
+    <p>页面支持搜索过滤、深色模式，可离线保存为单个 HTML 文件使用。</p>
+  </div>
+
+  <!-- ============ 1 系统信息 ============ -->
+  <section class="card" id="sysinfo">
+    <div class="card-head"><h2><span class="num">01</span>系统信息</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>uname -a</code></td><td>查看内核和系统信息</td></tr>
+          <tr><td><code>hostnamectl</code></td><td>查看 / 设置主机名，显示 OS、内核、架构</td></tr>
+          <tr><td><code>hostname</code></td><td>查看主机名</td></tr>
+          <tr><td><code>uptime</code></td><td>运行时间与系统负载</td></tr>
+          <tr><td><code>whoami</code></td><td>当前用户名</td></tr>
+          <tr><td><code>id</code></td><td>当前用户 UID / GID / 所属组</td></tr>
+          <tr><td><code>who</code> / <code>w</code></td><td>当前登录用户</td></tr>
+          <tr><td><code>date</code></td><td>查看日期时间</td></tr>
+          <tr><td><code>timedatectl</code></td><td>查看 / 设置时区与时间同步</td></tr>
+          <tr><td><code>lscpu</code></td><td>CPU 信息</td></tr>
+          <tr><td><code>lsmem</code></td><td>内存信息</td></tr>
+          <tr><td><code>free -h</code></td><td>内存使用情况</td></tr>
+          <tr><td><code>vmstat 1</code></td><td>虚拟内存 / CPU 统计</td></tr>
+          <tr><td><code>iostat -x 1</code></td><td>磁盘 I/O 统计</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2 OS 版本 ============ -->
+  <section class="card" id="osver">
+    <div class="card-head"><h2><span class="num">02</span>查看操作系统版本</h2></div>
+    <div class="card-body">
+      <p class="meta">注意：<b>操作系统版本</b>（发行版）和<b>内核版本</b>（Kernel）不是一回事。</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>目的</th><th>命令</th></tr></thead>
+        <tbody>
+          <tr><td>标准 OS 信息（推荐）</td><td><code>cat /etc/os-release</code></td></tr>
+          <tr><td>CentOS 版本</td><td><code>cat /etc/centos-release</code></td></tr>
+          <tr><td>RHEL 系版本</td><td><code>cat /etc/redhat-release</code></td></tr>
+          <tr><td>发行版信息</td><td><code>cat /etc/system-release</code></td></tr>
+          <tr><td>详细信息（OS + 内核 + 架构）</td><td><code>hostnamectl</code></td></tr>
+          <tr><td>LSB 信息（需装 redhat-lsb-core）</td><td><code>lsb_release -a</code></td></tr>
+          <tr><td>CentOS 版本包</td><td><code>rpm -q centos-release</code></td></tr>
+          <tr><td>主版本号</td><td><code>rpm -E %{rhel}</code></td></tr>
+          <tr><td>内核版本</td><td><code>uname -r</code></td></tr>
+          <tr><td>完整内核信息</td><td><code>uname -a</code></td></tr>
+          <tr><td>系统架构</td><td><code>uname -m</code></td></tr>
+          <tr><td>32 / 64 位</td><td><code>getconf LONG_BIT</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 class="sub">输出示例</h3>
+<pre><code>$ cat /etc/os-release
+NAME="CentOS Linux"
+VERSION="7 (Core)"
+ID="centos"
+ID_LIKE="rhel fedora"
+VERSION_ID="7"
+PRETTY_NAME="CentOS Linux 7 (Core)"
+CPE_NAME="cpe:/o:centos:centos:7"
+HOME_URL="https://www.centos.org/"
+
+$ hostnamectl
+   Static hostname: web01
+         Icon name: computer-vm
+           Chassis: vm
+    Virtualization: kvm
+  Operating System: CentOS Linux 7 (Core)
+       CPE OS Name: cpe:/o:centos:centos:7
+            Kernel: Linux 3.10.0-1160.el7.x86_64
+      Architecture: x86-64</code></pre>
+
+      <div class="tip">
+        <b>内核版本中的 el7 / el8 / el9</b> 表示对应的 RHEL / CentOS 大版本系列，例如
+        <code>3.10.0-1160.el7.x86_64</code> 属于 CentOS 7 系列。<br>
+        最小化安装可能没有 <code>lsb_release</code>，需先 <code>yum install redhat-lsb-core</code> 或 <code>dnf install redhat-lsb-core</code>。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3 cd ============ -->
+  <section class="card" id="cd">
+    <div class="card-head"><h2><span class="num">03</span>目录操作 <code style="font-size:15px">cd</code></h2></div>
+    <div class="card-body">
+      <p class="meta"><code>cd</code> 是 Shell 内建命令（change directory），只影响当前 Shell 会话。查看帮助：<code>help cd</code>。</p>
+
+      <h3 class="sub">语法与选项</h3>
+<pre><code>cd [选项] [目录]</code></pre>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>选项</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>-L</code></td><td>逻辑路径模式（默认），跟随符号链接</td></tr>
+          <tr><td><code>-P</code></td><td>物理路径模式，解析符号链接使用真实路径</td></tr>
+          <tr><td><code>-e</code></td><td>与 <code>-P</code> 同用时，无法确定当前目录则返回非零状态</td></tr>
+          <tr><td><code>--</code></td><td>结束选项，用于目录名以 <code>-</code> 开头的情况</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 class="sub">常用操作</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>cd</code></td><td>回到当前用户家目录</td></tr>
+          <tr><td><code>cd ~</code></td><td>回到当前用户家目录</td></tr>
+          <tr><td><code>cd /</code></td><td>进入根目录</td></tr>
+          <tr><td><code>cd /etc</code></td><td>按绝对路径进入</td></tr>
+          <tr><td><code>cd etc</code></td><td>按相对路径进入当前目录下的 etc</td></tr>
+          <tr><td><code>cd ..</code></td><td>进入上一级目录</td></tr>
+          <tr><td><code>cd ../..</code></td><td>进入上两级目录</td></tr>
+          <tr><td><code>cd .</code></td><td>进入当前目录（通常无变化）</td></tr>
+          <tr><td><code>cd -</code></td><td>返回上一次所在目录并打印该目录</td></tr>
+          <tr><td><code>cd ~user</code></td><td>进入指定用户的家目录</td></tr>
+          <tr><td><code>cd "My Documents"</code></td><td>目录名含空格需加引号</td></tr>
+          <tr><td><code>cd -- -dir</code></td><td>进入以 <code>-</code> 开头的目录</td></tr>
+          <tr><td><code>cd -P /tmp/link</code></td><td>以物理真实路径进入符号链接目录</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 class="sub">特殊路径符号</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>符号</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td><code>/</code></td><td>根目录</td></tr>
+          <tr><td><code>.</code></td><td>当前目录</td></tr>
+          <tr><td><code>..</code></td><td>父目录</td></tr>
+          <tr><td><code>~</code></td><td>当前用户家目录</td></tr>
+          <tr><td><code>~user</code></td><td>指定用户家目录</td></tr>
+          <tr><td><code>-</code></td><td>上一次工作目录（仅 cd 特殊识别，依赖 OLDPWD）</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 class="sub">带空格与变量</h3>
+<pre><code>cd "My Documents"      # 双引号
+cd 'My Documents'      # 单引号
+cd My\ Documents       # 反斜杠转义
+
+dir="/var/www/my site"
+cd "$dir"              # 变量必须加引号，否则空格会被拆成多个参数</code></pre>
+
+      <h3 class="sub">CDPATH 快速跳转</h3>
+<pre><code>export CDPATH=.:~:/var/www:/opt
+cd html        # 当前目录没有 html 时，会自动尝试 /var/www/html 等</code></pre>
+      <div class="tip">
+        <b>脚本中不建议依赖 CDPATH</b>，它可能导致 <code>cd</code> 跳到意外位置。脚本开头常写 <code>unset CDPATH</code>。
+      </div>
+
+      <h3 class="sub">目录栈：pushd / popd / dirs</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>pushd 目录</code></td><td>进入目录并压入栈</td></tr>
+          <tr><td><code>popd</code></td><td>弹出栈顶，返回新栈顶目录</td></tr>
+          <tr><td><code>dirs</code></td><td>显示目录栈</td></tr>
+          <tr><td><code>dirs -v</code></td><td>带编号显示目录栈（编号 0 为当前目录）</td></tr>
+          <tr><td><code>dirs -c</code></td><td>清空目录栈</td></tr>
+          <tr><td><code>pushd +N</code></td><td>旋转到栈中第 N 个目录</td></tr>
+          <tr><td><code>popd +N</code></td><td>删除栈中第 N 个目录</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 class="sub">常见错误</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>错误提示</th><th>原因</th></tr></thead>
+        <tbody>
+          <tr><td><code>No such file or directory</code></td><td>目录不存在或路径拼错</td></tr>
+          <tr><td><code>Not a directory</code></td><td>目标是文件而非目录</td></tr>
+          <tr><td><code>Permission denied</code></td><td>路径中某一级目录缺少执行权限 x</td></tr>
+          <tr><td><code>too many arguments</code></td><td>路径含空格但未加引号</td></tr>
+          <tr><td><code>OLDPWD not set</code></td><td>尚未切换过目录就使用 <code>cd -</code></td></tr>
+          <tr><td><code>sudo: cd: command not found</code></td><td>不能用 <code>sudo cd</code>，见下方说明</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="tip">
+        <b>为什么 <code>sudo cd /root</code> 无效？</b> <code>cd</code> 是 Shell 内建命令，<code>sudo</code> 会启动新进程，切换只发生在该子进程中，不会影响当前 Shell。正确做法：<code>sudo -i</code> 或 <code>sudo bash</code> 后再 <code>cd</code>。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4 ls ============ -->
+  <section class="card" id="ls">
+    <div class="card-head"><h2><span class="num">04</span><code style="font-size:15px">ls</code> 命令速查表</h2></div>
+    <div class="card-body">
+      <p class="meta">语法：<code>ls [选项] [文件或目录...]</code>。CentOS 默认使用 GNU ls，支持 <code>--color</code>、<code>--time-style</code>、<code>--group-directories-first</code> 等扩展选项。</p>
+
+      <h3 class="sub">最常用</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>ls</code></td><td>列出当前目录非隐藏文件</td></tr>
+          <tr><td><code>ls -l</code></td><td>长格式显示</td></tr>
+          <tr><td><code>ls -lh</code></td><td>长格式 + 人类可读大小</td></tr>
+          <tr><td><code>ls -lah</code></td><td>长格式 + 人类可读 + 含隐藏文件</td></tr>
+          <tr><td><code>ls -a</code></td><td>显示所有文件，含 <code>.</code> 和 <code>..</code></td></tr>
+          <tr><td><code>ls -A</code></td><td>显示隐藏文件，但不含 <code>.</code> 和 <code>..</code></td></tr>
+          <tr><td><code>ls -lt</code></td><td>按修改时间排序，新到旧</td></tr>
+          <tr><td><code>ls -ltr</code></td><td>按修改时间排序，旧到新</td></tr>
+          <tr><td><code>ls -lS</code></td><td>按文件大小排序，大到小</td></tr>
+          <tr><td><code>ls -lSh</code></td><td>按人类可读大小排序</td></tr>
+          <tr><td><code>ls -R</code></td><td>递归列出子目录</td></tr>
+          <tr><td><code>ls -d */</code></td><td>只列出当前目录下的子目录</td></tr>
+          <tr><td><code>ls -ld /path</code></td><td>查看目录本身，不展开内容</td></tr>
+          <tr><td><code>ls -i</code></td><td>显示 inode 号</td></tr>
+          <tr><td><code>ls -Z</code></td><td>显示 SELinux 安全上下文</td></tr>
+          <tr><td><code>ls -F</code></td><td>给目录、可执行文件等加类型标记</td></tr>
+          <tr><td><code>ls -1</code></td><td>每行一个文件</td></tr>
+          <tr><td><code>ls --color=auto</code></td><td>彩色输出</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 class="sub">显示与信息类选项</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>选项</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>-l</code></td><td>长格式</td></tr>
+          <tr><td><code>-h</code></td><td>人类可读大小，如 1K、234M</td></tr>
+          <tr><td><code>--si</code></td><td>使用 1000 进制，如 kB、MB</td></tr>
+          <tr><td><code>-s</code></td><td>显示占用的块数</td></tr>
+          <tr><td><code>-i</code></td><td>显示 inode</td></tr>
+          <tr><td><code>-n</code></td><td>显示数字 UID / GID</td></tr>
+          <tr><td><code>-Z</code></td><td>显示 SELinux 上下文</td></tr>
+          <tr><td><code>-g</code></td><td>类似 -l，但不显示所有者</td></tr>
+          <tr><td><code>-o</code></td><td>类似 -l，但不显示所属组</td></tr>
+          <tr><td><code>-G</code></td><td>长格式中不显示组</td></tr>
+          <tr><td><code>--full-time</code></td><td>显示完整时间</td></tr>
+          <tr><td><code>--time-style=long-iso</code></td><td>时间格式：long-iso / iso / full-iso / +%F %T</td></tr>
+          <tr><td><code>-I '*.log'</code></td><td>忽略匹配模式的文件</td></tr>
+          <tr><td><code>-B</code></td><td>忽略备份文件（<code>*~</code>）</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 class="sub">排序与时间</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>选项</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>-t</code></td><td>按修改时间排序</td></tr>
+          <tr><td><code>-S</code></td><td>按文件大小排序</td></tr>
+          <tr><td><code>-X</code></td><td>按扩展名排序</td></tr>
+          <tr><td><code>-r</code></td><td>反转排序</td></tr>
+          <tr><td><code>-U</code></td><td>不排序，按目录顺序</td></tr>
+          <tr><td><code>-v</code></td><td>自然排序，file2 排在 file10 前</td></tr>
+          <tr><td><code>-u</code></td><td>配合 -lt 使用访问时间 atime</td></tr>
+          <tr><td><code>-c</code></td><td>配合 -lt 使用状态改变时间 ctime</td></tr>
+          <tr><td><code>--group-directories-first</code></td><td>目录排在文件前面</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 class="sub">输出格式</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>选项</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>-1</code></td><td>单列输出</td></tr>
+          <tr><td><code>-C</code></td><td>多列纵向输出（默认）</td></tr>
+          <tr><td><code>-x</code></td><td>多列横向输出</td></tr>
+          <tr><td><code>-m</code></td><td>逗号分隔输出</td></tr>
+          <tr><td><code>-F</code></td><td>类型标记：<code>/</code> 目录、<code>*</code> 可执行、<code>@</code> 链接</td></tr>
+          <tr><td><code>-p</code></td><td>只给目录加 <code>/</code></td></tr>
+          <tr><td><code>-Q</code></td><td>文件名加双引号</td></tr>
+          <tr><td><code>-b</code></td><td>转义非图形字符</td></tr>
+          <tr><td><code>-L</code></td><td>跟随符号链接显示目标信息</td></tr>
+          <tr><td><code>-H</code></td><td>只跟随命令行上的符号链接</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3 class="sub">-l 长格式字段</h3>
+<pre><code>-rw-r--r-- 1 root root 1234 Sep 26 12:00 file.txt
+lrwxrwxrwx 1 root root    7 Sep 26 12:00 link -&gt; /etc/hosts</code></pre>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>字段</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td><code>-rw-r--r--</code></td><td>文件类型 + 权限</td></tr>
+          <tr><td><code>1</code></td><td>硬链接数</td></tr>
+          <tr><td><code>root</code></td><td>所有者</td></tr>
+          <tr><td><code>root</code></td><td>所属组</td></tr>
+          <tr><td><code>1234</code></td><td>大小（默认字节）</td></tr>
+          <tr><td><code>Sep 26 12:00</code></td><td>修改时间</td></tr>
+          <tr><td><code>file.txt</code></td><td>文件名</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="meta">文件类型首字符：<code>-</code> 普通文件、<code>d</code> 目录、<code>l</code> 符号链接、<code>c</code> 字符设备、<code>b</code> 块设备、<code>s</code> 套接字、<code>p</code> 命名管道。</p>
+
+      <h3 class="sub">常见组合</h3>
+<pre><code>ls -lah
+ls -ltr
+ls -lSh
+ls -lh --time-style=long-iso
+ls -l --group-directories-first
+ls -d */
+ls -ld /var/log
+ls -i /etc/hosts
+ls -Z /var/www
+ls -l /etc/yum.repos.d/*.repo
+ls -lt | head          # 查看最新的几个文件</code></pre>
+
+      <div class="tip">
+        <b>注意：</b><code>ls -l</code> 中的 <code>total</code> 是块数而非字节数；查看目录本身用 <code>ls -ld 目录</code>；
+        脚本中不要解析 <code>ls</code> 输出，应使用 <code>find</code>、<code>stat</code>、<code>readlink</code>。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5 包管理 ============ -->
+  <section class="card" id="pkg">
+    <div class="card-head"><h2><span class="num">05</span>包管理（yum / dnf / rpm）</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>yum install 包</code> / <code>dnf install 包</code></td><td>安装软件</td></tr>
+          <tr><td><code>yum remove 包</code> / <code>dnf remove 包</code></td><td>卸载软件</td></tr>
+          <tr><td><code>yum update</code> / <code>dnf update</code></td><td>更新系统</td></tr>
+          <tr><td><code>yum search 关键词</code></td><td>搜索软件</td></tr>
+          <tr><td><code>yum info 包</code></td><td>查看软件信息</td></tr>
+          <tr><td><code>yum list installed</code></td><td>列出已安装软件</td></tr>
+          <tr><td><code>yum provides 文件</code></td><td>查询文件属于哪个包</td></tr>
+          <tr><td><code>yum clean all</code></td><td>清理缓存</td></tr>
+          <tr><td><code>rpm -qa</code></td><td>列出所有 RPM 包</td></tr>
+          <tr><td><code>rpm -ql 包</code></td><td>列出包内文件</td></tr>
+          <tr><td><code>rpm -qf 文件</code></td><td>查询文件属于哪个包</td></tr>
+          <tr><td><code>rpm -ivh 包.rpm</code></td><td>安装 RPM</td></tr>
+          <tr><td><code>rpm -e 包</code></td><td>卸载 RPM</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6 服务控制 ============ -->
+  <section class="card" id="service">
+    <div class="card-head"><h2><span class="num">06</span>服务与系统控制（systemctl）</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>systemctl start 服务</code></td><td>启动服务</td></tr>
+          <tr><td><code>systemctl stop 服务</code></td><td>停止服务</td></tr>
+          <tr><td><code>systemctl restart 服务</code></td><td>重启服务</td></tr>
+          <tr><td><code>systemctl reload 服务</code></td><td>重载配置</td></tr>
+          <tr><td><code>systemctl status 服务</code></td><td>查看服务状态</td></tr>
+          <tr><td><code>systemctl enable 服务</code></td><td>设置开机自启</td></tr>
+          <tr><td><code>systemctl disable 服务</code></td><td>关闭开机自启</td></tr>
+          <tr><td><code>systemctl is-enabled 服务</code></td><td>查看是否开机自启</td></tr>
+          <tr><td><code>systemctl list-units --type=service</code></td><td>列出所有服务</td></tr>
+          <tr><td><code>systemctl daemon-reload</code></td><td>重载 systemd 配置</td></tr>
+          <tr><td><code>service 服务 start</code></td><td>旧版服务管理方式</td></tr>
+          <tr><td><code>chkconfig 服务 on</code></td><td>旧版开机自启</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 7 用户与组 ============ -->
+  <section class="card" id="user">
+    <div class="card-head"><h2><span class="num">07</span>用户与组</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>useradd -m -s /bin/bash 用户</code></td><td>创建用户</td></tr>
+          <tr><td><code>passwd 用户</code></td><td>设置密码</td></tr>
+          <tr><td><code>usermod -aG 组 用户</code></td><td>加入附加组</td></tr>
+          <tr><td><code>userdel -r 用户</code></td><td>删除用户及家目录</td></tr>
+          <tr><td><code>groupadd 组</code></td><td>创建组</td></tr>
+          <tr><td><code>groups 用户</code></td><td>查看用户所属组</td></tr>
+          <tr><td><code>id 用户</code></td><td>查看 UID / GID</td></tr>
+          <tr><td><code>su - 用户</code></td><td>切换用户（含环境变量）</td></tr>
+          <tr><td><code>sudo 命令</code></td><td>提权执行</td></tr>
+          <tr><td><code>visudo</code></td><td>编辑 sudo 配置</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8 权限 ============ -->
+  <section class="card" id="perm">
+    <div class="card-head"><h2><span class="num">08</span>权限与所有权</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>chmod 755 文件</code></td><td>修改权限</td></tr>
+          <tr><td><code>chmod -R 755 目录</code></td><td>递归修改权限</td></tr>
+          <tr><td><code>chown 用户:组 文件</code></td><td>修改所有者和所属组</td></tr>
+          <tr><td><code>chgrp 组 文件</code></td><td>修改所属组</td></tr>
+          <tr><td><code>umask</code></td><td>查看 / 设置默认权限掩码</td></tr>
+          <tr><td><code>getfacl 文件</code></td><td>查看 ACL</td></tr>
+          <tr><td><code>setfacl -m u:用户:rw 文件</code></td><td>设置 ACL</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 9 查找与文本 ============ -->
+  <section class="card" id="text">
+    <div class="card-head"><h2><span class="num">09</span>查找与文本处理</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>find /path -name "*.conf"</code></td><td>按名称查找</td></tr>
+          <tr><td><code>find /path -type f -size +100M</code></td><td>按大小查找</td></tr>
+          <tr><td><code>locate 文件名</code></td><td>快速查找（需 updatedb）</td></tr>
+          <tr><td><code>which 命令</code></td><td>命令所在路径</td></tr>
+          <tr><td><code>whereis 命令</code></td><td>命令相关文件</td></tr>
+          <tr><td><code>type 命令</code></td><td>判断命令类型</td></tr>
+          <tr><td><code>cat 文件</code></td><td>查看文件内容</td></tr>
+          <tr><td><code>less 文件</code></td><td>分页查看</td></tr>
+          <tr><td><code>head -n 20 文件</code></td><td>查看前 20 行</td></tr>
+          <tr><td><code>tail -f 文件</code></td><td>实时查看文件末尾</td></tr>
+          <tr><td><code>grep -rin "关键词" 目录</code></td><td>递归搜索</td></tr>
+          <tr><td><code>sed -i 's/旧/新/g' 文件</code></td><td>替换文本</td></tr>
+          <tr><td><code>awk '{print $1}' 文件</code></td><td>按列处理</td></tr>
+          <tr><td><code>cut -d: -f1 文件</code></td><td>截取字段</td></tr>
+          <tr><td><code>sort 文件</code></td><td>排序</td></tr>
+          <tr><td><code>uniq</code></td><td>去重</td></tr>
+          <tr><td><code>wc -l 文件</code></td><td>统计行数</td></tr>
+          <tr><td><code>diff 文件1 文件2</code></td><td>比较差异</td></tr>
+          <tr><td><code>vim 文件</code></td><td>编辑文件</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 10 压缩归档 ============ -->
+  <section class="card" id="archive">
+    <div class="card-head"><h2><span class="num">10</span>压缩与归档</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>tar -czvf 包.tar.gz 目录</code></td><td>打包并 gzip 压缩</td></tr>
+          <tr><td><code>tar -xzvf 包.tar.gz</code></td><td>解压 gzip 包</td></tr>
+          <tr><td><code>tar -cjvf 包.tar.bz2 目录</code></td><td>打包并 bzip2 压缩</td></tr>
+          <tr><td><code>tar -xjvf 包.tar.bz2</code></td><td>解压 bzip2 包</td></tr>
+          <tr><td><code>tar -cJvf 包.tar.xz 目录</code></td><td>打包并 xz 压缩</td></tr>
+          <tr><td><code>tar -xJvf 包.tar.xz</code></td><td>解压 xz 包</td></tr>
+          <tr><td><code>gzip 文件</code></td><td>压缩为 .gz</td></tr>
+          <tr><td><code>gunzip 文件.gz</code></td><td>解压 .gz</td></tr>
+          <tr><td><code>zip -r 包.zip 目录</code></td><td>压缩为 zip</td></tr>
+          <tr><td><code>unzip 包.zip</code></td><td>解压 zip</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="tip">
+        <b>tar 参数记忆：</b><code>c</code> 创建、<code>x</code> 解压、<code>t</code> 查看、<code>z</code> gzip、<code>j</code> bzip2、<code>J</code> xz、<code>v</code> 显示过程、<code>f</code> 指定文件名。
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 11 进程 ============ -->
+  <section class="card" id="proc">
+    <div class="card-head"><h2><span class="num">11</span>进程管理</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>ps aux</code></td><td>查看所有进程</td></tr>
+          <tr><td><code>ps -ef</code></td><td>查看进程（含父子关系）</td></tr>
+          <tr><td><code>top</code></td><td>实时进程监控</td></tr>
+          <tr><td><code>htop</code></td><td>增强版 top（需安装）</td></tr>
+          <tr><td><code>kill PID</code></td><td>结束指定进程</td></tr>
+          <tr><td><code>kill -9 PID</code></td><td>强制结束进程</td></tr>
+          <tr><td><code>pkill 名称</code></td><td>按名称结束进程</td></tr>
+          <tr><td><code>killall 名称</code></td><td>结束所有同名进程</td></tr>
+          <tr><td><code>jobs</code></td><td>查看后台任务</td></tr>
+          <tr><td><code>bg</code> / <code>fg</code></td><td>后台 / 前台切换</td></tr>
+          <tr><td><code>nohup 命令 &amp;</code></td><td>后台运行且不随终端退出</td></tr>
+          <tr><td><code>screen</code> / <code>tmux</code></td><td>终端复用</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 12 网络 ============ -->
+  <section class="card" id="net">
+    <div class="card-head"><h2><span class="num">12</span>网络与防火墙</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>ip addr</code></td><td>查看 IP 地址</td></tr>
+          <tr><td><code>ip route</code></td><td>查看路由表</td></tr>
+          <tr><td><code>ping 主机</code></td><td>测试连通性</td></tr>
+          <tr><td><code>traceroute 主机</code></td><td>路由追踪</td></tr>
+          <tr><td><code>mtr 主机</code></td><td>持续路由诊断</td></tr>
+          <tr><td><code>curl URL</code></td><td>HTTP 请求</td></tr>
+          <tr><td><code>wget URL</code></td><td>下载文件</td></tr>
+          <tr><td><code>ss -tulnp</code></td><td>查看监听端口</td></tr>
+          <tr><td><code>netstat -tulnp</code></td><td>旧版端口查看</td></tr>
+          <tr><td><code>dig 域名</code></td><td>DNS 查询</td></tr>
+          <tr><td><code>nslookup 域名</code></td><td>DNS 查询</td></tr>
+          <tr><td><code>host 域名</code></td><td>DNS 查询</td></tr>
+          <tr><td><code>nmcli</code></td><td>NetworkManager 命令行</td></tr>
+          <tr><td><code>nmtui</code></td><td>网络配置文本界面</td></tr>
+          <tr><td><code>firewall-cmd --state</code></td><td>防火墙状态</td></tr>
+          <tr><td><code>firewall-cmd --list-all</code></td><td>查看防火墙规则</td></tr>
+          <tr><td><code>firewall-cmd --add-port=80/tcp --permanent</code></td><td>永久开放端口</td></tr>
+          <tr><td><code>firewall-cmd --reload</code></td><td>重载防火墙规则</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 13 磁盘 ============ -->
+  <section class="card" id="disk">
+    <div class="card-head"><h2><span class="num">13</span>磁盘与文件系统</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>df -h</code></td><td>查看磁盘使用情况</td></tr>
+          <tr><td><code>du -sh *</code></td><td>查看当前目录各文件大小</td></tr>
+          <tr><td><code>lsblk</code></td><td>块设备树状列表</td></tr>
+          <tr><td><code>fdisk -l</code></td><td>查看分区表</td></tr>
+          <tr><td><code>parted</code></td><td>分区工具</td></tr>
+          <tr><td><code>mkfs.xfs /dev/sdb1</code></td><td>格式化为 XFS</td></tr>
+          <tr><td><code>mount /dev/sdb1 /mnt</code></td><td>挂载</td></tr>
+          <tr><td><code>umount /mnt</code></td><td>卸载</td></tr>
+          <tr><td><code>blkid</code></td><td>查看设备 UUID</td></tr>
+          <tr><td><code>fsck /dev/sdb1</code></td><td>文件系统检查</td></tr>
+          <tr><td><code>/etc/fstab</code></td><td>开机挂载配置文件</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 14 日志 ============ -->
+  <section class="card" id="log">
+    <div class="card-head"><h2><span class="num">14</span>日志与排错</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>journalctl -xe</code></td><td>查看系统日志（含详细错误）</td></tr>
+          <tr><td><code>journalctl -u 服务</code></td><td>查看指定服务日志</td></tr>
+          <tr><td><code>journalctl -f</code></td><td>实时查看日志</td></tr>
+          <tr><td><code>tail -f /var/log/messages</code></td><td>系统消息日志</td></tr>
+          <tr><td><code>tail -f /var/log/secure</code></td><td>安全 / 登录日志</td></tr>
+          <tr><td><code>dmesg</code></td><td>内核日志</td></tr>
+          <tr><td><code>last</code></td><td>登录历史</td></tr>
+          <tr><td><code>lastb</code></td><td>失败登录记录</td></tr>
+          <tr><td><code>history</code></td><td>命令历史</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 15 SELinux ============ -->
+  <section class="card" id="selinux">
+    <div class="card-head"><h2><span class="num">15</span>SELinux</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>getenforce</code></td><td>查看 SELinux 状态</td></tr>
+          <tr><td><code>setenforce 0</code></td><td>临时切换到宽容模式</td></tr>
+          <tr><td><code>setenforce 1</code></td><td>临时切换到强制模式</td></tr>
+          <tr><td><code>sestatus</code></td><td>查看详细状态</td></tr>
+          <tr><td><code>ls -Z</code></td><td>查看文件安全上下文</td></tr>
+          <tr><td><code>ps -Z</code></td><td>查看进程安全上下文</td></tr>
+          <tr><td><code>restorecon -Rv /path</code></td><td>恢复安全上下文</td></tr>
+          <tr><td><code>semanage fcontext -a -t 类型 "/path(/.*)?"</code></td><td>添加上下文规则</td></tr>
+          <tr><td><code>setsebool -P 布尔值 on</code></td><td>设置布尔值（永久）</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 16 计划任务 ============ -->
+  <section class="card" id="cron">
+    <div class="card-head"><h2><span class="num">16</span>计划任务与时间</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>crontab -e</code></td><td>编辑定时任务</td></tr>
+          <tr><td><code>crontab -l</code></td><td>查看定时任务</td></tr>
+          <tr><td><code>crontab -r</code></td><td>删除所有定时任务</td></tr>
+          <tr><td><code>systemctl status crond</code></td><td>查看 cron 服务状态</td></tr>
+          <tr><td><code>at 时间</code></td><td>一次性定时任务</td></tr>
+          <tr><td><code>date</code></td><td>查看当前时间</td></tr>
+          <tr><td><code>timedatectl set-timezone Asia/Shanghai</code></td><td>设置时区</td></tr>
+          <tr><td><code>chronyc sources</code></td><td>查看时间同步状态</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="meta">crontab 格式：<code>分 时 日 月 周 命令</code>，例如 <code>0 3 * * * /root/backup.sh</code> 表示每天 3:00 执行。</p>
+    </div>
+  </section>
+
+  <!-- ============ 17 关机重启 ============ -->
+  <section class="card" id="power">
+    <div class="card-head"><h2><span class="num">17</span>关机与重启</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>命令</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>shutdown -h now</code></td><td>立即关机</td></tr>
+          <tr><td><code>shutdown -r now</code></td><td>立即重启</td></tr>
+          <tr><td><code>reboot</code></td><td>重启</td></tr>
+          <tr><td><code>poweroff</code></td><td>关机</td></tr>
+          <tr><td><code>halt</code></td><td>停止系统</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 18 快捷键 ============ -->
+  <section class="card" id="key">
+    <div class="card-head"><h2><span class="num">18</span>常用快捷键</h2></div>
+    <div class="card-body">
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>快捷键</th><th>作用</th></tr></thead>
+        <tbody>
+          <tr><td><code>Tab</code></td><td>命令 / 路径补全</td></tr>
+          <tr><td><code>Ctrl+C</code></td><td>中断当前命令</td></tr>
+          <tr><td><code>Ctrl+D</code></td><td>退出当前 Shell</td></tr>
+          <tr><td><code>Ctrl+Z</code></td><td>挂起当前命令</td></tr>
+          <tr><td><code>Ctrl+L</code></td><td>清屏</td></tr>
+          <tr><td><code>Ctrl+R</code></td><td>搜索历史命令</td></tr>
+          <tr><td><code>!!</code></td><td>执行上一条命令</td></tr>
+          <tr><td><code>!$</code></td><td>引用上一条命令的最后一个参数</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 19 脚本实践 ============ -->
+  <section class="card" id="script">
+    <div class="card-head"><h2><span class="num">19</span>脚本中的常见实践</h2></div>
+    <div class="card-body">
+      <h3 class="sub">安全切换目录</h3>
+<pre><code>cd -- "$dir" || exit 1
+cd -- "$dir" || { echo "无法进入 $dir"; exit 1; }</code></pre>
+
+      <h3 class="sub">子 Shell 中临时切换</h3>
+<pre><code>(cd /var/log &amp;&amp; ls)     # 不影响当前 Shell 的工作目录</code></pre>
+
+      <h3 class="sub">脚本头部模板</h3>
+<pre><code>#!/bin/bash
+set -e
+unset CDPATH
+
+cd -- "$1" || exit 1
+pwd</code></pre>
+
+      <div class="tip">
+        常用 <code>set -e</code>（出错即退出）、<code>set -u</code>（使用未定义变量报错）、
+        <code>set -o pipefail</code>（管道任一环节失败即失败）提升脚本健壮性。
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  CentOS 常用命令速查手册 · 单文件离线版 · 按 <kbd>Ctrl/⌘ + F</kbd> 或使用顶部搜索框快速定位
+</footer>
+
+<button id="toTop" title="回到顶部">↑</button>
+
+<script>
+(function () {
+  /* ---------- 主题切换 ---------- */
+  var root = document.documentElement;
+  var themeBtn = document.getElementById('themeBtn');
+  var saved = null;
+  try { saved = localStorage.getItem('centos-cheat-theme'); } catch (e) {}
+  if (saved === 'dark' || (!saved && window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    root.classList.add('dark');
+  }
+  themeBtn.addEventListener('click', function () {
+    root.classList.toggle('dark');
+    try {
+      localStorage.setItem('centos-cheat-theme',
+        root.classList.contains('dark') ? 'dark' : 'light');
+    } catch (e) {}
+  });
+
+  /* ---------- 搜索过滤 ---------- */
+  var input = document.getElementById('q');
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section'));
+  var tbodyRows = [];
+  sections.forEach(function (sec) {
+    Array.prototype.forEach.call(sec.querySelectorAll('tbody tr'), function (tr) {
+      tbodyRows.push(tr);
+    });
+  });
+
+  function filter() {
+    var q = input.value.trim().toLowerCase();
+
+    if (!q) {
+      sections.forEach(function (sec) { sec.hidden = false; });
+      tbodyRows.forEach(function (tr) { tr.hidden = false; });
+      return;
+    }
+
+    sections.forEach(function (sec) {
+      var rows = sec.querySelectorAll('tbody tr');
+      var anyRow = false;
+
+      Array.prototype.forEach.call(rows, function (tr) {
+        var hit = tr.textContent.toLowerCase().indexOf(q) !== -1;
+        tr.hidden = !hit;
+        if (hit) anyRow = true;
+      });
+
+      var heading = sec.querySelector('h2');
+      var headingHit = heading && heading.textContent.toLowerCase().indexOf(q) !== -1;
+
+      var preHit = false;
+      if (!anyRow && !headingHit) {
+        preHit = Array.prototype.some.call(sec.querySelectorAll('pre'),
+          function (p) { return p.textContent.toLowerCase().indexOf(q) !== -1; });
+      }
+
+      sec.hidden = !(anyRow || headingHit || preHit);
+
+      /* 命中的章节里，若表格无命中但有代码块命中，恢复显示所有行 */
+      if (sec.hidden === false && !anyRow && (headingHit || preHit) && rows.length) {
+        Array.prototype.forEach.call(rows, function (tr) { tr.hidden = false; });
+      }
+    });
+  }
+
+  var timer = null;
+  input.addEventListener('input', function () {
+    clearTimeout(timer);
+    timer = setTimeout(filter, 120);
+  });
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { input.value = ''; filter(); }
+  });
+
+  /* ---------- 回到顶部 ---------- */
+  var toTop = document.getElementById('toTop');
+  window.addEventListener('scroll', function () {
+    toTop.classList.toggle('show', window.scrollY > 420);
+  }, { passive: true });
+  toTop.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+</script>
+</body>
+</html>
